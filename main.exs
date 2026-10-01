@@ -25,7 +25,7 @@ defmodule Main do
       registrar_entrega_adicional(validas, rechazadas, productores_por_codigo, tanques_por_id)
 
     liquidaciones = Liquidacion.liquidar(productores, validas)
-    nombres = Map.new(productores, fn p -> {p.codigo, p.nombre} end)
+    nombres = Map.new(for p <- productores, do: {p.codigo, p.nombre})
     datos_r3 = Reportes.r3(validas)
 
     Vista.r1(Reportes.r1(rechazadas))
@@ -41,8 +41,7 @@ defmodule Main do
     combinado = Reportes.combinar_con_vecino(datos_r3.litros_diarios, vecino)
     Vista.combinacion(datos_r3.litros_diarios, vecino, combinado)
 
-    codigo = leer_linea("\nIngrese el código del productor para el comprobante: ")
-    codigo = String.upcase(codigo)
+    codigo = String.upcase(leer_linea("\nIngrese el código del productor para el comprobante: "))
     Vista.comprobante(Liquidacion.comprobante(codigo, productores_por_codigo, validas), codigo)
   end
 
