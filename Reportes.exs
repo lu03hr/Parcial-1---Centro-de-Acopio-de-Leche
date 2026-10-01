@@ -40,6 +40,31 @@ defmodule Reportes do
   end
 
 
+# FUNCIONES AUXILIARES:
+
+  defp sumar_litros_por_campo(entregas, campo_de_agrupacion) do
+    Enum.reduce(
+      entregas,
+      %{},
+      fn entrega, litros_acumulados ->
+        grupo = Map.get(entrega, campo_de_agrupacion)
+
+        Map.update(
+          litros_acumulados,
+          grupo,
+          entrega.litros,
+          fn litros_actuales -> litros_actuales + entrega.litros end
+        )
+      end)
+  end
+
+  defp crear_mapa_productores(productores) do
+    Map.new(productores, fn productor -> {productor.codigo, productor.nombre} end)
+  end
+
+  defp crear_ficha_productor(codigo, mapa_productores) do
+    %{codigo: codigo, nombre: Map.get(mapa_productores, codigo)}
+  end
 
 
 end
