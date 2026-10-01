@@ -48,6 +48,18 @@ defmodule Mediciones do
       Reportes.sumar_litros_por(entregas, fn e -> e.dia end)
     end))
   end
+
+  def experimento_agregar(n) do
+    Util2.mostrar("\n3) Construir una lista de #{n} elementos", :mensaje)
+
+    imprimir("lista ++ [x] (al final)", medir(fn ->
+      Enum.reduce(1..n, [], fn x, acc -> acc ++ [x] end)
+    end))
+
+    imprimir("[x | lista] y Enum.reverse al final", medir(fn ->
+      1..n |> Enum.reduce([], fn x, acc -> [x | acc] end) |> Enum.reverse()
+    end))
+  end
 end
 
 Mediciones.main()
