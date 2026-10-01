@@ -1,5 +1,5 @@
 defmodule Entrada do
-def parsear_entrega(texto) do
+  def parsear_entrega(texto) do
     campos = texto |> String.trim() |> String.split(";") |> Enum.map(&String.trim/1)
 
     with [productor, tanque, dia_texto, litros_texto, grasa_texto] <- campos,
@@ -23,11 +23,12 @@ def parsear_entrega(texto) do
     case Integer.parse(texto) do
       {entero, ""} ->
         {:ok, entero}
-         ->
+
+      _ ->
         case Float.parse(texto) do
           {decimal, ""} -> {:ok, decimal}
           _ -> {:error, :no_numerico}
         end
-      end
     end
+  end
 end
