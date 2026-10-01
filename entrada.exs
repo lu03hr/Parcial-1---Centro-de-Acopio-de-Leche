@@ -11,4 +11,11 @@ def parsear_entrega(texto) do
       _ -> {:error, :formato_invalido}
     end
   end
-end 
+
+  def a_entero(texto) do
+    case Integer.parse(texto) do
+      {numero, ""} -> {:ok, numero}
+      _ -> {:error, :no_entero}
+    end
+  end
+end
