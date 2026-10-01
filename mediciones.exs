@@ -60,6 +60,20 @@ defmodule Mediciones do
       1..n |> Enum.reduce([], fn x, acc -> [x | acc] end) |> Enum.reverse()
     end))
   end
+
+  def main do
+    productores = Datos.productores()
+    tanques = Validacion.indexar_tanques(Datos.tanques())
+    {validas, _} = Validacion.clasificar(Datos.entregas(), Validacion.indexar_productores(productores), tanques)
+
+    grandes = for _ <- 1..200, e <- validas, do: e
+
+    Util2.mostrar("MEDICIONES CON :timer.tc/1 (#{@repeticiones} repeticiones por caso)", :mensaje)
+    experimento_busqueda(validas, productores, 1_000)
+    experimento_agrupacion(validas)
+    experimento_agrupacion(grandes)
+    experimento_agregar(5_000)
+  end
 end
 
 Mediciones.main()
