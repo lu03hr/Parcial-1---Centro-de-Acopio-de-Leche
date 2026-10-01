@@ -18,6 +18,10 @@ def main do
     {validas, rechazadas} = Validacion.clasificar(entregas, productores_por_codigo, tanques_por_id)
     Vista.resumen_carga(length(entregas), length(validas), length(rechazadas))
 
+
+    {validas, rechazadas} =
+      registrar_entrega_adicional(validas, rechazadas, productores_por_codigo, tanques_por_id)
+
 end
 end
 Main..main()
