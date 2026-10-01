@@ -11,8 +11,8 @@ defmodule Main do
   def main do
     productores = Datos.productores()
     tanques = Datos.tanques()
-    productores_por_codigo = Validacion.indexar_productores(productores)
-    tanques_por_id = Validacion.indexar_tanques(tanques)
+    productores_por_codigo = productores
+    tanques_por_id = tanques
 
     entregas = Datos.entregas()
 
