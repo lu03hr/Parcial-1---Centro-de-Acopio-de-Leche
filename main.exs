@@ -74,5 +74,13 @@ def registrar_entrega_adicional(validas, rechazadas, productores_por_codigo, tan
         end
 end
 end
+
+ defp leer_linea(mensaje) do
+    case IO.gets(mensaje) do
+      :eof -> ""
+      {:error, _razon} -> ""
+      linea -> String.trim(linea)
+    end
+  end
 end
 Main..main()
