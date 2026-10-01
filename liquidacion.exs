@@ -18,44 +18,64 @@ defmodule Liquidacion do
     entrega.litros * Parametros.tarifa_base() * factor_calidad(entrega.grasa)
   end
 
-  @doc "Suma los litros de una lista de entregas agrupándolos por día: %{dia => litros}."
+  @doc "Suma los litros de una lista de entregas."
+  def total_litros(entregas) do
+    entregas
+    |> Enum.map(fn entrega -> entrega.litros end)
+    |> Enum.sum()
+  end
+
+  @doc "Suma el valor de una lista de entregas."
+  def total_valor(entregas) do
+    entregas
+    |> Enum.map(fn entrega -> valor_entrega(entrega) end)
+    |> Enum.sum()
+  end
+
+  @doc "Litros de cada día, como lista de tuplas: [{1, 470}, {3, 180}]."
   def litros_por_dia(entregas) do
-  entregas
-  |> Enum.group_by(fn e -> e.dia end, fn e -> e.litros end)
-  |> Map.new(fn {dia, litros} -> {dia, Enum.sum(litros)} end)
+    entregas
+    |> Enum.group_by(fn entrega -> entrega.dia end)
+    |> Enum.map(fn {dia, entregas_del_dia} -> {dia, total_litros(entregas_del_dia)} end)
   end
 
   @doc "Bonificación de un día según el total de litros válidos de ese día."
   def bonificacion_dia(litros_del_dia) do
-    if litros_del_dia >= Parametros.litros_bonificacion(),
-      do: Parametros.bonificacion_diaria(),
-      else: 0
+    if litros_del_dia >= Parametros.litros_bonificacion() do
+      Parametros.bonificacion_diaria()
+    else
+      0
+    end
   end
-   @doc """
+
+  @doc """
   Liquida un productor con sus entregas válidas, si la lista está vacía
   todos los valores quedan en cero
   """
   def liquidar_productor(productor, entregas) do
     por_dia = litros_por_dia(entregas)
-    litros = Enum.sum(Map.values(por_dia))
-    valor = entregas
-    |> Enum.map(&valor_entrega/1)
-    |> Enum.sum()
-    bonificaciones = por_dia
-    |> Map.values()
-    |> Enum.map(&bonificacion_dia/1)
-    |> Enum.sum()
-    dias_entrega = Enum.count(por_dia)
+    dias_entrega = length(por_dia)
+
+    valor = total_valor(entregas)
+
+    bonificaciones =
+      por_dia
+      |> Enum.map(fn {_dia, litros} -> bonificacion_dia(litros) end)
+      |> Enum.sum()
 
     transporte =
-      if productor.transporte, do: dias_entrega * Parametros.costo_transporte(), else: 0
+      if productor.transporte do
+        dias_entrega * Parametros.costo_transporte()
+      else
+        0
+      end
 
     %{
       codigo: productor.codigo,
       nombre: productor.nombre,
       entregas: length(entregas),
       dias_entrega: dias_entrega,
-      litros: litros,
+      litros: total_litros(entregas),
       valor_entregas: valor,
       bonificaciones: bonificaciones,
       transporte: transporte,
@@ -65,8 +85,12 @@ defmodule Liquidacion do
 
   @doc "Liquida a todos los productores, aunque no tengan entregas válidas."
   def liquidar(productores, validas) do
-    por_productor = Enum.group_by(validas, fn e -> e.productor end)
-    Enum.map(productores, fn p -> liquidar_productor(p, Map.get(por_productor, p.codigo, [])) end)
+    por_productor = Enum.group_by(validas, fn entrega -> entrega.productor end)
+
+    Enum.map(productores, fn productor ->
+      entregas = Map.get(por_productor, productor.codigo, [])
+      liquidar_productor(productor, entregas)
+    end)
   end
 
   @doc """
@@ -74,37 +98,32 @@ defmodule Liquidacion do
   Devuelve tuplas {:ok, comprobante} o {:error, :productor_no_existe}.
   """
   def comprobante(codigo, productores_por_codigo, validas) do
-    case Map.get(productores_por_codigo, codigo) do
-      nil ->
-        {:error, :productor_no_existe}
+    productor = Map.get(productores_por_codigo, codigo)
 
-      productor ->
-        propias = Enum.filter(validas, fn e -> e.productor == codigo end)
-
-        por_dia_ordenado =
-          propias
-          |> Enum.group_by(fn e -> e.dia end)
-          |> Enum.sort_by(fn {dia, _del_dia} -> dia end)
-
-        detalle =
-          for {dia, del_dia} <- por_dia_ordenado do
-            litros = del_dia
-            |> Enum.map(fn e -> e.litros end)
-            |> Enum.sum()
-            valor = del_dia
-            |> Enum.map(&valor_entrega/1)
-            |> Enum.sum()
-
-            %{
-              dia: dia,
-              entregas: length(del_dia),
-              litros: litros,
-              valor: valor,
-              bonificacion: bonificacion_dia(litros)
-            }
-          end
-
-        {:ok, Map.put(liquidar_productor(productor, propias), :detalle, detalle)}
+    if productor == nil do
+      {:error, :productor_no_existe}
+    else
+      entregas = Enum.filter(validas, fn entrega -> entrega.productor == codigo end)
+      liquidacion = liquidar_productor(productor, entregas)
+      {:ok, Map.put(liquidacion, :detalle, detalle_por_dia(entregas))}
     end
+  end
+
+  # Una fila por cada día en que el productor entregó, ordenadas por día
+  defp detalle_por_dia(entregas) do
+    entregas
+    |> Enum.group_by(fn entrega -> entrega.dia end)
+    |> Enum.sort_by(fn {dia, _entregas_del_dia} -> dia end)
+    |> Enum.map(fn {dia, entregas_del_dia} ->
+      litros = total_litros(entregas_del_dia)
+
+      %{
+        dia: dia,
+        entregas: length(entregas_del_dia),
+        litros: litros,
+        valor: total_valor(entregas_del_dia),
+        bonificacion: bonificacion_dia(litros)
+      }
+    end)
   end
 end
