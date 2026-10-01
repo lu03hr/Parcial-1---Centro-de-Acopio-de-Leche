@@ -13,6 +13,11 @@ def main do
     tanques = Datos.tanques()
     productores_por_codigo = Validacion.indexar_productores(productores)
     tanques_por_id = Validacion.indexar_tanques(tanques)
-end 
+
+     entregas = Datos.entregas()
+    {validas, rechazadas} = Validacion.clasificar(entregas, productores_por_codigo, tanques_por_id)
+    Vista.resumen_carga(length(entregas), length(validas), length(rechazadas))
+
+end
 end
 Main..main()
