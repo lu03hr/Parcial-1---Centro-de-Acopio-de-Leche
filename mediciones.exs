@@ -25,8 +25,7 @@ defmodule Mediciones do
   end
 
   def experimento_busqueda(entregas, productores, vueltas) do
-    indice = Validacion.indexar_productores(productores)
-
+indice = Enum.reduce(productores, %{}, fn productor, mapa -> Map.put(mapa, productor.codigo, productor) end)
     Util2.mostrar(
       "\n1) Buscar el productor de cada entrega (#{vueltas} vueltas sobre #{length(entregas)} entregas)",
       :mensaje
@@ -89,14 +88,8 @@ defmodule Mediciones do
 
   def main do
     productores = Datos.productores()
-    tanques = Validacion.indexar_tanques(Datos.tanques())
-
-    {validas, _} =
-      Validacion.clasificar(
-        Datos.entregas(),
-        Validacion.indexar_productores(productores),
-        tanques
-      )
+    tanques = Datos.tanques()
+    {validas, _} = Validacion.clasificar(Datos.entregas(), productores, tanques)
 
     grandes = for _ <- 1..200, e <- validas, do: e
 
