@@ -17,6 +17,10 @@ defmodule Mediciones do
 
     {Enum.min(tiempos), div(Enum.sum(tiempos), @repeticiones)}
   end
+
+  def imprimir(nombre, {minimo, promedio}) do
+    Util2.mostrar("  #{String.pad_trailing(nombre, 44)} mín: #{String.pad_leading(Integer.to_string(minimo), 8)} µs   prom: #{String.pad_leading(Integer.to_string(promedio), 8)} µs", :mensaje)
+  end
 end
 
 Mediciones.main()
