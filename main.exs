@@ -41,6 +41,10 @@ def main do
     combinado = Reportes.combinar_con_vecino(datos_r3.litros_diarios, vecino)
     Vista.combinacion(datos_r3.litros_diarios, vecino, combinado)
 
+     codigo = leer_linea("\nIngrese el código del productor para el comprobante: ")
+    codigo = String.upcase(codigo)
+    Vista.comprobante(Liquidacion.comprobante(codigo, productores_por_codigo, validas), codigo)
+
 end
 end
 Main..main()
