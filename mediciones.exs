@@ -34,6 +34,20 @@ defmodule Mediciones do
       for _ <- 1..vueltas, e <- entregas, do: Map.has_key?(indice, e.productor)
     end))
   end
+
+  def experimento_agrupacion(entregas) do
+    Util2.mostrar("\n2) Litros por día con #{length(entregas)} entregas", :mensaje)
+
+    imprimir("Enum.group_by y luego sumar cada grupo", medir(fn ->
+      entregas
+      |> Enum.group_by(fn e -> e.dia end)
+      |> Map.new(fn {dia, lista} -> {dia, Enum.sum(Enum.map(lista, fn e -> e.litros end))} end)
+    end))
+
+    imprimir("Enum.reduce con Map.update (una pasada)", medir(fn ->
+      Reportes.sumar_litros_por(entregas, fn e -> e.dia end)
+    end))
+  end
 end
 
 Mediciones.main()
