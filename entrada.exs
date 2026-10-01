@@ -23,6 +23,11 @@ def parsear_entrega(texto) do
     case Integer.parse(texto) do
       {entero, ""} ->
         {:ok, entero}
+         ->
+        case Float.parse(texto) do
+          {decimal, ""} -> {:ok, decimal}
+          _ -> {:error, :no_numerico}
+        end
       end
-    end 
+    end
 end
