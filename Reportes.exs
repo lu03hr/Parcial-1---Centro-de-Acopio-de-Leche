@@ -323,6 +323,7 @@ defmodule Reportes do
     grasa_ponderada = suma(grasa * litros) / suma(litros)
     grasa_simple    = suma(grasa) / cantidad_de_entregas
 
+  Se guardan las dos para explicar en el PDF por qué pueden diferir.
   """
 
   def calcular_r6(entregas_validas, productores) do
@@ -344,10 +345,6 @@ defmodule Reportes do
       mejor_productor: List.first(clasificacion)
     }
   end
-
-  # Fórmulas:
-  #   grasa_ponderada = suma(grasa * litros) / suma(litros)
-  #   grasa_simple    = suma(grasa) / cantidad_de_entregas
 
   defp calcular_calidad_del_productor(productor, entregas) do
     cantidad_de_entregas = length(entregas)
