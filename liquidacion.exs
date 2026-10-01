@@ -68,4 +68,43 @@ defmodule Liquidacion do
     por_productor = Enum.group_by(validas, fn e -> e.productor end)
     Enum.map(productores, fn p -> liquidar_productor(p, Map.get(por_productor, p.codigo, [])) end)
   end
+
+  @doc """
+  Datos del comprobante de un productor.
+  Devuelve tuplas {:ok, comprobante} o {:error, :productor_no_existe}.
+  """
+  def comprobante(codigo, productores_por_codigo, validas) do
+    case Map.get(productores_por_codigo, codigo) do
+      nil ->
+        {:error, :productor_no_existe}
+
+      productor ->
+        propias = Enum.filter(validas, fn e -> e.productor == codigo end)
+
+        por_dia_ordenado =
+          propias
+          |> Enum.group_by(fn e -> e.dia end)
+          |> Enum.sort_by(fn {dia, _del_dia} -> dia end)
+
+        detalle =
+          for {dia, del_dia} <- por_dia_ordenado do
+            litros = del_dia
+            |> Enum.map(fn e -> e.litros end)
+            |> Enum.sum()
+            valor = del_dia
+            |> Enum.map(&valor_entrega/1)
+            |> Enum.sum()
+
+            %{
+              dia: dia,
+              entregas: length(del_dia),
+              litros: litros,
+              valor: valor,
+              bonificacion: bonificacion_dia(litros)
+            }
+          end
+
+        {:ok, Map.put(liquidar_productor(productor, propias), :detalle, detalle)}
+    end
+  end
 end
