@@ -46,5 +46,33 @@ def main do
     Vista.comprobante(Liquidacion.comprobante(codigo, productores_por_codigo, validas), codigo)
 
 end
+
+def registrar_entrega_adicional(validas, rechazadas, productores_por_codigo, tanques_por_id) do
+    Util2.mostrar("Ingrese una entrega adicional", :mensaje)
+    Util2.mostrar("(productor;tanque;dia;litros;grasa)", :mensaje)
+    texto = leer_linea("o Enter para omitir: ")
+
+    if texto == "" do
+      Util2.mostrar("No se registró entrega adicional.", :mensaje)
+      {validas, rechazadas}
+    else
+      case Entrada.parsear_entrega(texto) do
+        {:error, :formato_invalido} ->
+          Util2.mostrar("Entrada no registrada: {:error, :formato_invalido}", :mensaje)
+          {validas, rechazadas}
+
+        {:ok, entrega} ->
+          case Validacion.validar(entrega, productores_por_codigo, tanques_por_id) do
+            {:ok, valida} ->
+              Util2.mostrar("Entrega adicional aceptada.", :mensaje)
+              {validas ++ [valida], rechazadas}
+
+            {:error, motivo} ->
+              Util2.mostrar("Entrega adicional rechazada: #{motivo}", :mensaje)
+              {validas, rechazadas ++ [{entrega, motivo}]}
+          end
+        end
+end
+end
 end
 Main..main()
