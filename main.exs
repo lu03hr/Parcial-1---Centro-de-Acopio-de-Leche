@@ -36,6 +36,11 @@ def main do
     Vista.r7(Reportes.r7(liquidaciones))
     Vista.r8(Reportes.r8(productores, tanques, validas))
 
+
+     vecino = Datos.centro_vecino()
+    combinado = Reportes.combinar_con_vecino(datos_r3.litros_diarios, vecino)
+    Vista.combinacion(datos_r3.litros_diarios, vecino, combinado)
+
 end
 end
 Main..main()
