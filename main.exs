@@ -26,6 +26,16 @@ def main do
        liquidaciones = Liquidacion.liquidar(productores, validas)
     nombres = Map.new(productores, fn p -> {p.codigo, p.nombre} end)
     datos_r3 = Reportes.r3(validas)
+
+     Vista.r1(Reportes.r1(rechazadas))
+    Vista.r2(Reportes.r2(tanques, validas))
+    Vista.r3(datos_r3)
+    Vista.r4(Reportes.r4(liquidaciones))
+    Vista.r5(Reportes.r5(validas), nombres)
+    Vista.r6(Reportes.r6(productores, validas))
+    Vista.r7(Reportes.r7(liquidaciones))
+    Vista.r8(Reportes.r8(productores, tanques, validas))
+
 end
 end
 Main..main()
