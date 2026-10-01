@@ -22,6 +22,10 @@ def main do
     {validas, rechazadas} =
       registrar_entrega_adicional(validas, rechazadas, productores_por_codigo, tanques_por_id)
 
+
+       liquidaciones = Liquidacion.liquidar(productores, validas)
+    nombres = Map.new(productores, fn p -> {p.codigo, p.nombre} end)
+    datos_r3 = Reportes.r3(validas)
 end
 end
 Main..main()
