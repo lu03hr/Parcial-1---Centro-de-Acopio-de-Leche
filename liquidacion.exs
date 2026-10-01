@@ -98,7 +98,7 @@ defmodule Liquidacion do
   Devuelve tuplas {:ok, comprobante} o {:error, :productor_no_existe}.
   """
   def comprobante(codigo, productores_por_codigo, validas) do
-    productor = Map.get(productores_por_codigo, codigo)
+    productor = Enum.find(productores_por_codigo, fn productor -> productor.codigo == codigo end)
 
     if productor == nil do
       {:error, :productor_no_existe}
