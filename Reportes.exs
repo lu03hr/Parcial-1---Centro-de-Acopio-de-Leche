@@ -1,3 +1,5 @@
+# Integrantes: Luisa Hernández, Isabella Hincapié, Camila González
+
 defmodule Reportes do
 
   # Mínimo de entregas válidas para entrar al reporte R6.
@@ -11,6 +13,10 @@ defmodule Reportes do
     :porcentaje_invalido
   ]
 
+  @doc """
+  Ordena una lista según un campo indicado y permite establecer
+  el sentido del orden y un campo para desempatar.
+  """
   def ranking(lista, opciones) do
     campo = Keyword.fetch!(opciones, :campo)
     orden = Keyword.get(opciones, :orden, :desc)
@@ -28,6 +34,10 @@ defmodule Reportes do
     |> Util2.ordenar(orden, fn elemento -> Map.get(elemento, campo) end)
   end
 
+   @doc """
+  Genera todos los reportes de la semana utilizando las entregas
+  válidas, rechazadas, productores, tanques y liquidación.
+  """
   def generar_reportes(entregas_validas, entregas_rechazadas, productores, tanques, liquidacion) do
     %{
       r1: calcular_r1(entregas_rechazadas),
@@ -44,6 +54,9 @@ defmodule Reportes do
 
  # FUNCIONES AUXILIARES:
 
+   @doc """
+  Suma los litros de las entregas agrupándolas según el campo indicado.
+  """
   defp sumar_litros_por_campo(entregas, campo_de_agrupacion) do
     Enum.reduce(
       entregas,
@@ -60,26 +73,31 @@ defmodule Reportes do
       end)
   end
 
+  @doc """
+  Crea un mapa que relaciona el código de cada productor con su nombre.
+  """
   defp crear_mapa_productores(productores) do
     Map.new(productores, fn productor -> {productor.codigo, productor.nombre} end)
   end
 
+  @doc """
+  Crea una ficha con el código y nombre de un productor.
+  """
   defp crear_ficha_productor(codigo, mapa_productores) do
     %{codigo: codigo, nombre: Map.get(mapa_productores, codigo)}
   end
 
   # -------------------------------------------------------------------
-
   # R1. Entregas rechazadas
 
   @doc """
   R1: devuelve las entregas rechazadas con su motivo y la cantidad
-  de rechazos por cada uno de los 5 motivos (los que no aparecen quedan en 0).
+  de rechazos por cada uno de los 5 motivos.
+  Los motivos que no aparecen quedan en 0.
   """
-
   def calcular_r1(entregas_rechazadas) do
     cantidad_por_motivo =
-      Enum.map(@motivos_de_rechazo, fn motivo ->
+      Enum.map(@motivos, fn motivo ->
         {motivo, contar_rechazos_del_motivo(entregas_rechazadas, motivo)}
       end)
 
@@ -89,6 +107,9 @@ defmodule Reportes do
     }
   end
 
+  @doc """
+  Cuenta cuántas entregas fueron rechazadas por un motivo específico.
+  """
   defp contar_rechazos_del_motivo(entregas_rechazadas, motivo) do
     entregas_rechazadas
     |> Enum.filter(fn {_entrega, motivo_de_la_entrega} -> motivo_de_la_entrega == motivo end)
@@ -97,19 +118,22 @@ defmodule Reportes do
 
 
   # -------------------------------------------------------------------
-
   # R2. Ocupación de tanques
 
   @doc """
-  R2: litros almacenados por tanque y porcentaje de ocupación, ordenado de mayor a menor porcentaje.
+  R2: calcula los litros almacenados por tanque y el porcentaje
+  de ocupación, ordenados de mayor a menor porcentaje.
   """
-
   def calcular_r2(entregas_validas, tanques) do
     tanques
     |> Enum.map(fn tanque -> calcular_ocupacion_del_tanque(tanque, entregas_validas) end)
     |> ranking(campo: :porcentaje_ocupacion, orden: :desc, desempate: :id)
   end
 
+  @doc """
+  Calcula la cantidad de litros almacenados y el porcentaje
+  de ocupación de un tanque.
+  """
   defp calcular_ocupacion_del_tanque(tanque, entregas_validas) do
     litros_almacenados =
       entregas_validas
@@ -127,17 +151,12 @@ defmodule Reportes do
 
 
   # -------------------------------------------------------------------
-
   # R3. Litros por día y meta diaria
 
   @doc """
-  Devuelve un mapa con los litros de cada uno de los días,
-  por ejemplo:
-  %{1 => 1850.5, 2 => 0, ..., 6 => 2100}.
-  Los días sin entregas quedan en 0.
-  Pública porque se usa para el ejercicio de Map.merge/3.
+  Devuelve un mapa con los litros recibidos en cada uno de los días.
+  Los días sin entregas quedan con valor 0.
   """
-
   def calcular_litros_por_dia(entregas_validas) do
 
     litros_iniciales =
@@ -162,7 +181,8 @@ defmodule Reportes do
 
 
   @doc """
-  calcular_r3: litros recibidos cada día, si se alcanzó la meta diaria, y si se cumplió todos los días o al menos un día.
+  R3: calcula los litros recibidos cada día, indica si se alcanzó
+  la meta diaria y determina si se cumplió todos los días o al menos un día.
   """
   def calcular_r3(entregas_validas) do
 
@@ -204,26 +224,25 @@ defmodule Reportes do
 
 
   # -------------------------------------------------------------------
-
   # R4. Liquidación ordenada
 
   @doc """
-  calcular_r4: la liquidación ordenada por pago neto de mayor a menor. La numeración la agrega Vista.exs al imprimir.
+  R4: ordena la liquidación de productores por el pago neto,
+  de mayor a menor. La numeración se agrega al momento de imprimir.
   """
   def calcular_r4(liquidacion) do
     liquidacion
     |> ranking(campo: :neto, orden: :desc, desempate: :codigo)
   end
 
-  # -------------------------------------------------------------------
-
+ # -------------------------------------------------------------------
   # R5. Mayor entregador de cada día
 
   @doc """
-  calcular_r5: productor(es) con más litros cada día (si hay empate salen todos)
-  y quién ocupó el primer lugar en más días.
+  R5: calcula el productor o productores con más litros cada día.
+  Si existe empate, se incluyen todos los productores empatados.
+  También determina quién ocupó el primer lugar en más días.
   """
-
   def calcular_r5(entregas_validas, productores) do
     detalle_por_dia =
       Enum.map(1..Parametros.dias(), fn dia ->
@@ -236,6 +255,10 @@ defmodule Reportes do
     }
   end
 
+  @doc """
+  Calcula los productores con mayor cantidad de litros entregados
+  en un día determinado.
+  """
   defp calcular_lideres_del_dia(dia, entregas_validas, productores) do
     entregas_del_dia = obtener_entregas_por(entregas_validas, :dia, dia)
 
@@ -265,14 +288,25 @@ defmodule Reportes do
     }
   end
 
+  @doc """
+  Devuelve una lista vacía cuando no hubo litros entregados.
+  """
   defp obtener_lideres(_litros_por_productor, 0), do: []
 
+  @doc """
+  Obtiene los productores que tienen la cantidad máxima de litros
+  y los ordena por código.
+  """
   defp obtener_lideres(litros_por_productor, litros_del_lider) do
     litros_por_productor
     |> Enum.filter(fn productor -> productor.litros == litros_del_lider end)
     |> ranking(campo: :codigo, orden: :asc)
   end
 
+  @doc """
+  Calcula cuántos días fue líder cada productor y determina
+  quién ocupó el primer lugar durante más días.
+  """
   defp calcular_primer_lugar_en_mas_dias(detalle_por_dia, productores) do
     dias_como_lider_por_productor =
       Enum.map(productores, fn productor ->
@@ -299,33 +333,43 @@ defmodule Reportes do
     }
   end
 
+  @doc """
+  Devuelve una lista vacía cuando ningún productor ocupó
+  el primer lugar durante algún día.
+  """
   defp obtener_ganadores(_dias_como_lider_por_productor, 0), do: []
 
+  @doc """
+  Obtiene los productores que ocuparon el primer lugar durante
+  la mayor cantidad de días y los ordena por código.
+  """
   defp obtener_ganadores(dias_como_lider_por_productor, maximo_de_dias) do
     dias_como_lider_por_productor
     |> Enum.filter(fn productor -> productor.dias_como_lider == maximo_de_dias end)
     |> ranking(campo: :codigo, orden: :asc)
   end
 
+  @doc """
+  Verifica si un productor fue líder durante un día específico.
+  """
   defp fue_lider_ese_dia?(dia, codigo_del_productor) do
     Enum.any?(dia.productores_lideres, fn lider -> lider.codigo == codigo_del_productor end)
   end
 
 
   # -------------------------------------------------------------------
-
   # R6. Mejor calidad
 
   @doc """
-  calcular_r6: productor con mejor calidad entre quienes tienen al menos 3 entregas válidas.
+  R6: calcula la clasificación de productores con mejor calidad
+  entre quienes tienen al menos 3 entregas válidas.
 
   Fórmulas:
     grasa_ponderada = suma(grasa * litros) / suma(litros)
-    grasa_simple    = suma(grasa) / cantidad_de_entregas
+    grasa_simple = suma(grasa) / cantidad_de_entregas
 
-  Se guardan las dos para explicar en el PDF por qué pueden diferir.
+  Se guardan las dos medidas para poder compararlas.
   """
-
   def calcular_r6(entregas_validas, productores) do
     clasificacion =
       productores
@@ -333,7 +377,7 @@ defmodule Reportes do
         {productor, obtener_entregas_por(entregas_validas, :productor, productor.codigo)}
       end)
       |> Enum.filter(fn {_productor, entregas} ->
-        length(entregas) >= @minimo_de_entregas_para_calidad
+        length(entregas) >= @minimo_entregas_validas
       end)
       |> Enum.map(fn {productor, entregas} ->
         calcular_calidad_del_productor(productor, entregas)
@@ -346,6 +390,10 @@ defmodule Reportes do
     }
   end
 
+  @doc """
+  Calcula la calidad de un productor utilizando la grasa ponderada
+  por litros y la grasa simple.
+  """
   defp calcular_calidad_del_productor(productor, entregas) do
     cantidad_de_entregas = length(entregas)
     litros_totales = sumar_litros(entregas)
@@ -372,17 +420,16 @@ defmodule Reportes do
 
 
   # -------------------------------------------------------------------
-
   # R7. Total pagado y costo por litro
 
   @doc """
-  calcular_r7: total pagado por el centro en la semana y costo promedio por litro.
+  R7: calcula el total pagado por el centro durante la semana,
+  los litros recibidos y el costo promedio por litro.
 
   Fórmulas:
-    total_pagado             = suma de los netos de todos los productores
+    total_pagado = suma de los netos de todos los productores
     costo_promedio_por_litro = total_pagado / litros_recibidos
   """
-
   def calcular_r7(entregas_validas, liquidacion) do
 
     total_pagado =
@@ -399,31 +446,44 @@ defmodule Reportes do
     }
   end
 
+  @doc """
+  Devuelve 0 cuando no se recibieron litros para evitar
+  una división entre cero.
+  """
   defp calcular_costo_por_litro(_total_pagado, 0), do: 0
 
+  @doc """
+  Calcula el costo promedio por litro recibido.
+  """
   defp calcular_costo_por_litro(total_pagado, litros_recibidos) do
     total_pagado / litros_recibidos
   end
 
 
   # -------------------------------------------------------------------
-
   # R8. Productores con entregas en todos los tanques
 
   @doc """
-  calcular_r8: productores con al menos una entrega válida en cada uno de los tanques.
+  R8: obtiene los productores que tienen al menos una entrega válida
+  en cada uno de los tanques.
   """
-
   def calcular_r8(entregas_validas, productores, tanques) do
     Enum.filter(productores, fn productor ->
       entrego_en_todos_los_tanques?(productor, entregas_validas, tanques)
     end)
   end
 
+  @doc """
+  Verifica si un productor realizó al menos una entrega válida
+  en todos los tanques disponibles.
+  """
   defp entrego_en_todos_los_tanques?(productor, entregas_validas, tanques) do
     Enum.all?(tanques, fn tanque -> entrego_en_el_tanque?(productor, tanque, entregas_validas) end)
   end
 
+  @doc """
+  Verifica si un productor realizó una entrega válida en un tanque específico.
+  """
   defp entrego_en_el_tanque?(productor, tanque, entregas_validas) do
     Enum.any?(entregas_validas, fn entrega -> entrega.productor == productor.codigo and entrega.tanque == tanque.id end)
   end
