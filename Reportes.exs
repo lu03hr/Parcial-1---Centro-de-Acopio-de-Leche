@@ -152,7 +152,7 @@ defmodule Reportes do
   """
   def calcular_litros_por_dia(entregas_validas) do
     litros_iniciales =
-      for dia <- 1..Parametros.dias(), into: %{} do
+     for dia <- Parametros.dias(), into: %{} do
         {dia, 0}
       end
 
@@ -235,7 +235,7 @@ defmodule Reportes do
   """
   def calcular_r5(entregas_validas, productores) do
     detalle_por_dia =
-      Enum.map(1..Parametros.dias(), fn dia ->
+      Enum.map(Parametros.dias(), fn dia ->
         calcular_lideres_del_dia(dia, entregas_validas, productores)
       end)
 
@@ -466,6 +466,19 @@ defmodule Reportes do
           entrega.tanque == tanque.id
       end
     )
+  end
+
+    # -------------------------------------------------------------------
+  # INVESTIGACIÓN. Combinación con el centro vecino
+
+  @doc """
+  Combina los litros diarios del centro con los del centro vecino.
+  Si un día está en los dos mapas se suman; si está en uno solo queda igual.
+  """
+  def combinar_con_vecino(litros_por_dia, centro_vecino) do
+    Map.merge(litros_por_dia, centro_vecino, fn _dia, litros_propios, litros_vecino ->
+      litros_propios + litros_vecino
+    end)
   end
 
 end

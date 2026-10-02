@@ -2,7 +2,7 @@
 
 defmodule Vista do
 
-  @raya "============================================================"
+  @raya "-------------------------------------------------"
 
   @doc """
   Imprime los ocho reportes en orden.
@@ -91,6 +91,27 @@ defmodule Vista do
     |> Util2.mostrar(:mensaje)
   end
 
+  @doc """
+  Genera e imprime la combinación de litros diarios con el centro vecino.
+  """
+  def imprimir_combinacion(propios, vecino, combinado) do
+    generar_mensaje_combinacion(propios, vecino, combinado)
+    |> Util2.mostrar(:mensaje)
+  end
+
+  @doc """
+  Imprime el comprobante de un productor, o avisa si el código no existe.
+  """
+  def imprimir_comprobante({:error, :productor_no_existe}, codigo) do
+    Util2.mostrar("\nEl productor #{codigo} no existe.", :error)
+  end
+
+  def imprimir_comprobante({:ok, comprobante}, _codigo) do
+    comprobante
+    |> generar_mensaje_comprobante()
+    |> Util2.mostrar(:mensaje)
+  end
+
   # -------------------------------------------------------------------
   # GENERAR R1. Entregas rechazadas
 
@@ -164,7 +185,7 @@ defmodule Vista do
   end
 
 
-   # -------------------------------------------------------------------
+  # -------------------------------------------------------------------
   # GENERAR R5. Mayor entregador de cada día
 
   defp generar_mensaje_r5(r5) do
@@ -258,8 +279,67 @@ defmodule Vista do
   end
 
 
+  # -------------------------------------------------------------------
+  # INVESTIGACIÓN. Combinación con el centro vecino
 
- # FUNCIONES DE FORMATO
+  defp generar_mensaje_combinacion(propios, vecino, combinado) do
+    dias = combinado |> Map.keys() |> Util2.ordenar(:asc)
+
+    [
+      generar_titulo("Investigación. Combinación con el centro vecino (Map.merge/3)"),
+      "  Día\tPropio\tVecino\tCombinado\n",
+      Util2.convertir_coleccion_mensaje(dias, fn dia ->
+        propio = generar_valor_del_dia(propios, dia)
+        del_vecino = generar_valor_del_dia(vecino, dia)
+        total = formatear_decimales(combinado[dia], 1)
+        "  #{dia}\t#{propio}\t#{del_vecino}\t#{total}\n"
+      end)
+    ]
+  end
+
+  # Si el día no está en el mapa, muestra "-"
+  defp generar_valor_del_dia(mapa, dia) do
+    if Map.has_key?(mapa, dia) do
+      formatear_decimales(mapa[dia], 1)
+    else
+      "-"
+    end
+  end
+
+
+  # -------------------------------------------------------------------
+  # COMPROBANTE DEL PRODUCTOR
+
+  defp generar_mensaje_comprobante(comprobante) do
+    [
+      generar_titulo("Comprobante de pago"),
+      "  Productor: #{comprobante.nombre} (#{comprobante.codigo})\n\n",
+      generar_lineas_de_comprobante(comprobante.detalle),
+      "\n  Litros entregados: #{formatear_decimales(comprobante.litros, 1)} L\n",
+      "  Total entregas: #{formatear_pesos(comprobante.valor_entregas)}\n",
+      "  Total bonificaciones: #{formatear_pesos(comprobante.bonificaciones)}\n",
+      "  Descuento por transporte: #{formatear_pesos(comprobante.transporte)}\n",
+      "  Neto a pagar: #{formatear_pesos(comprobante.neto)}\n"
+    ]
+  end
+
+  defp generar_lineas_de_comprobante([]), do: "  No tuvo entregas válidas en la semana.\n"
+
+  defp generar_lineas_de_comprobante(detalle) do
+    [
+      "  Día\tLitros\tValor\tBonificación\n",
+      Util2.convertir_coleccion_mensaje(detalle, fn dia ->
+        litros = formatear_decimales(dia.litros, 1)
+        valor = formatear_pesos(dia.valor)
+        bonificacion = formatear_pesos(dia.bonificacion)
+        "  #{dia.dia}\t#{litros}\t#{valor}\t#{bonificacion}\n"
+      end)
+    ]
+  end
+
+
+  # -------------------------------------------------------------------
+  # FUNCIONES DE FORMATO
 
   defp generar_titulo(texto) do
     "\n#{@raya}\n#{texto}\n#{@raya}\n"
@@ -275,6 +355,5 @@ defmodule Vista do
 
   defp generar_si_o_no(true), do: "Sí"
   defp generar_si_o_no(false), do: "No"
-
 
 end
