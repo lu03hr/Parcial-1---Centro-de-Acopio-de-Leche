@@ -14,8 +14,7 @@ defmodule Reportes do
   ]
 
   @doc """
-  Ordena una lista según un campo indicado y permite establecer
-  el sentido del orden y un campo para desempatar.
+  Ordena una lista según un campo indicado y permite establecer el sentido del orden y un campo para desempatar.
   """
   def ranking(lista, opciones) do
     campo = Keyword.fetch!(opciones, :campo)
@@ -35,8 +34,7 @@ defmodule Reportes do
   end
 
   @doc """
-  Genera todos los reportes de la semana utilizando las entregas
-  válidas, rechazadas, productores, tanques y liquidación.
+  Genera todos los reportes de la semana utilizando las entregas válidas, rechazadas, productores, tanques y liquidación.
   """
   def generar_reportes(entregas_validas, entregas_rechazadas, productores, tanques, liquidacion) do
     %{
@@ -51,9 +49,7 @@ defmodule Reportes do
     }
   end
 
-
-  # FUNCIONES AUXILIARES
-
+  # Suma los litros agrupándolos según un campo.
   defp sumar_litros_por_campo(entregas, campo_de_agrupacion) do
     Enum.reduce(
       entregas,
@@ -80,12 +76,8 @@ defmodule Reportes do
   end
 
 
-  # -------------------------------------------------------------------
-  # R1. Entregas rechazadas
-
   @doc """
-  R1: devuelve las entregas rechazadas con su motivo y la cantidad
-  de rechazos por cada uno de los 5 motivos.
+  R1: devuelve las entregas rechazadas con su motivo y la cantidad de rechazos por cada uno de los 5 motivos.
   Los motivos que no aparecen quedan en 0.
   """
   def calcular_r1(entregas_rechazadas) do
@@ -107,12 +99,8 @@ defmodule Reportes do
   end
 
 
-  # -------------------------------------------------------------------
-  # R2. Ocupación de tanques
-
   @doc """
-  R2: calcula los litros almacenados por tanque y el porcentaje
-  de ocupación, ordenados de mayor a menor porcentaje.
+  R2: calcula los litros almacenados por tanque y el porcentaje de ocupación, ordenados de mayor a menor porcentaje.
   """
   def calcular_r2(entregas_validas, tanques) do
     tanques
@@ -143,9 +131,6 @@ defmodule Reportes do
   end
 
 
-  # -------------------------------------------------------------------
-  # R3. Litros por día y meta diaria
-
   @doc """
   Devuelve un mapa con los litros recibidos en cada uno de los días.
   Los días sin entregas quedan con valor 0.
@@ -171,8 +156,7 @@ defmodule Reportes do
   end
 
   @doc """
-  R3: calcula los litros recibidos cada día, indica si se alcanzó
-  la meta diaria y determina si se cumplió todos los días o al menos un día.
+  R3: calcula los litros recibidos cada día, indica si se alcanzó la meta diaria y determina si se cumplió todos los días o al menos un día.
   """
   def calcular_r3(entregas_validas) do
     meta_diaria =
@@ -212,21 +196,13 @@ defmodule Reportes do
   end
 
 
-  # -------------------------------------------------------------------
-  # R4. Liquidación ordenada
-
   @doc """
-  R4: ordena la liquidación de productores por el pago neto,
-  de mayor a menor. La numeración se agrega al momento de imprimir.
+  R4: ordena la liquidación de productores por el pago neto, de mayor a menor. La numeración se agrega al momento de imprimir.
   """
   def calcular_r4(liquidacion) do
     liquidacion
     |> ranking(campo: :neto, orden: :desc, desempate: :codigo)
   end
-
-
-  # -------------------------------------------------------------------
-  # R5. Mayor entregador de cada día
 
   @doc """
   R5: calcula el productor o productores con más litros cada día.
@@ -328,12 +304,8 @@ defmodule Reportes do
   end
 
 
-  # -------------------------------------------------------------------
-  # R6. Mejor calidad
-
   @doc """
-  R6: calcula la clasificación de productores con mejor calidad
-  entre quienes tienen al menos 3 entregas válidas.
+  R6: calcula la clasificación de productores con mejor calidad entre quienes tienen al menos 3 entregas válidas.
 
   Fórmulas:
     grasa_ponderada = suma(grasa * litros) / suma(litros)
@@ -404,12 +376,8 @@ defmodule Reportes do
   end
 
 
-  # -------------------------------------------------------------------
-  # R7. Total pagado y costo por litro
-
   @doc """
-  R7: calcula el total pagado por el centro durante la semana,
-  los litros recibidos y el costo promedio por litro.
+  R7: calcula el total pagado por el centro durante la semana, los litros recibidos y el costo promedio por litro.
 
   Fórmulas:
     total_pagado = suma de los netos de todos los productores
@@ -439,12 +407,8 @@ defmodule Reportes do
   end
 
 
-  # -------------------------------------------------------------------
-  # R8. Productores con entregas en todos los tanques
-
   @doc """
-  R8: obtiene los productores que tienen al menos una entrega válida
-  en cada uno de los tanques.
+  R8: obtiene los productores que tienen al menos una entrega válida en cada uno de los tanques.
   """
   def calcular_r8(entregas_validas, productores, tanques) do
     Enum.filter(productores, fn productor ->
@@ -468,7 +432,6 @@ defmodule Reportes do
     )
   end
 
-    # -------------------------------------------------------------------
   # INVESTIGACIÓN. Combinación con el centro vecino
 
   @doc """
