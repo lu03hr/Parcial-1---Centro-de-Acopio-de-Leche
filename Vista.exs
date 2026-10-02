@@ -94,9 +94,7 @@ defmodule Vista do
   # -------------------------------------------------------------------
   # GENERAR R1. Entregas rechazadas
 
-  @doc """
-  Genera el mensaje que se muestra para el reporte R1.
-  """
+
   defp generar_mensaje_r1(r1) do
     [
       generar_titulo("Reporte 1. Entregas rechazadas"),
@@ -106,15 +104,8 @@ defmodule Vista do
     ]
   end
 
-  @doc """
-  Genera el texto correspondiente cuando no hubo entregas rechazadas.
-  """
   defp generar_lineas_de_rechazadas([]), do: "  No hubo entregas rechazadas.\n"
 
-  @doc """
-  Genera una línea de texto para cada entrega rechazada,
-  mostrando la entrega y su motivo.
-  """
   defp generar_lineas_de_rechazadas(entregas_rechazadas) do
     Util2.convertir_coleccion_mensaje(entregas_rechazadas, fn {entrega, motivo} -> "  #{inspect(entrega)}  ->  #{motivo}\n" end)
   end
@@ -123,10 +114,6 @@ defmodule Vista do
   # -------------------------------------------------------------------
   # GENERAR R2. Ocupación de tanques
 
-  @doc """
-  Genera el mensaje del reporte R2 mostrando litros,
-  capacidad y porcentaje de ocupación de cada tanque.
-  """
   defp generar_mensaje_r2(filas_de_tanques) do
     [
       generar_titulo("Reporte 2. Ocupación de tanques (de mayor a menor)"),
@@ -143,10 +130,6 @@ defmodule Vista do
   # -------------------------------------------------------------------
   # GENERAR R3. Litros por día y meta diaria
 
-  @doc """
-  Genera el mensaje del reporte R3 con los litros recibidos
-  y el cumplimiento de la meta diaria.
-  """
   defp generar_mensaje_r3(r3) do
     meta = formatear_decimales(Parametros.meta_diaria(), 0)
     [
@@ -163,10 +146,6 @@ defmodule Vista do
   # -------------------------------------------------------------------
   # GENERAR R4. Liquidación de productores
 
-  @doc """
-  Genera el mensaje del reporte R4 mostrando la liquidación
-  ordenada y numerada de los productores.
-  """
   defp generar_mensaje_r4(liquidacion_ordenada) do
     productores_numerados = Enum.with_index(liquidacion_ordenada, 1)
 
@@ -188,10 +167,6 @@ defmodule Vista do
    # -------------------------------------------------------------------
   # GENERAR R5. Mayor entregador de cada día
 
-  @doc """
-  Genera el mensaje del reporte R5 mostrando el productor
-  con más litros de cada día.
-  """
   defp generar_mensaje_r5(r5) do
     [
       generar_titulo("Reporte 5. Productor con más litros cada día"),
@@ -200,43 +175,25 @@ defmodule Vista do
     ]
   end
 
-  @doc """
-  Genera el texto del reporte R5 cuando no hubo entregas válidas
-  durante un día.
-  """
   defp generar_linea_de_dia_r5(%{productores_lideres: [], dia: dia}) do
     "  Día #{dia}: sin entregas válidas\n"
   end
 
-  @doc """
-  Genera el texto del reporte R5 con los productores líderes de un día.
-  """
   defp generar_linea_de_dia_r5(dia) do
     nombres = generar_texto_de_productores(dia.productores_lideres)
     litros = formatear_decimales(dia.litros_del_lider, 1)
     "  Día #{dia.dia}: #{nombres} con #{litros} L\n"
   end
 
-  @doc """
-  Genera el texto correspondiente cuando ningún productor
-  ocupó el primer lugar.
-  """
   defp generar_linea_de_primer_lugar_r5(%{productores: []}) do
     "\n  Nadie ocupó el primer lugar.\n"
   end
 
-  @doc """
-  Genera el texto indicando los productores que ocuparon
-  el primer lugar durante más días.
-  """
   defp generar_linea_de_primer_lugar_r5(primer_lugar) do
     nombres = generar_texto_de_productores(primer_lugar.productores)
     "\n  Primer lugar en más días (#{primer_lugar.dias_en_primer_lugar} días): #{nombres}\n"
   end
 
-  @doc """
-  Convierte las fichas de productores en un texto con su nombre y código.
-  """
   defp generar_texto_de_productores(fichas) do
     fichas
     |> Enum.map(fn ficha -> "#{ficha.nombre} (#{ficha.codigo})" end)
@@ -247,10 +204,6 @@ defmodule Vista do
   # -------------------------------------------------------------------
   # R6. Mejor calidad
 
-  @doc """
-  Genera el mensaje del reporte R6 cuando ningún productor
-  tiene al menos 3 entregas válidas.
-  """
   defp generar_mensaje_r6(%{mejor_productor: nil}) do
     [
       generar_titulo("Reporte 6. Mejor calidad (grasa ponderada por litros)"),
@@ -258,10 +211,6 @@ defmodule Vista do
     ]
   end
 
-  @doc """
-  Genera el mensaje del reporte R6 mostrando el productor
-  con mejor calidad y la clasificación de los demás productores.
-  """
   defp generar_mensaje_r6(r6) do
     mejor = r6.mejor_productor
     grasa_del_mejor = formatear_decimales(mejor.grasa_ponderada, 3)
@@ -282,10 +231,6 @@ defmodule Vista do
   # -------------------------------------------------------------------
   # R7. Total pagado y costo por litro
 
-  @doc """
-  Genera el mensaje del reporte R7 mostrando el total pagado,
-  los litros recibidos y el costo promedio por litro.
-  """
   defp generar_mensaje_r7(r7) do
     [
       generar_titulo("Reporte 7. Totales de la semana"),
@@ -299,10 +244,6 @@ defmodule Vista do
   # -------------------------------------------------------------------
   # R8. Productores con entregas en todos los tanques
 
-  @doc """
-  Genera el mensaje del reporte R8 mostrando los productores
-  que realizaron entregas en todos los tanques.
-  """
   defp generar_mensaje_r8(productores) do
     [
       generar_titulo("Reporte 8. Productores con entregas en todos los tanques"),
@@ -310,16 +251,8 @@ defmodule Vista do
     ]
   end
 
-  @doc """
-  Genera el texto correspondiente cuando no hay productores
-  con entregas en todos los tanques.
-  """
   defp generar_lineas_de_productores_r8([]), do: "  Ninguno.\n"
 
-  @doc """
-  Genera una línea de texto para cada productor que realizó
-  entregas en todos los tanques.
-  """
   defp generar_lineas_de_productores_r8(productores) do
     Util2.convertir_coleccion_mensaje(productores, fn productor -> "  #{productor.codigo} - #{productor.nombre}\n" end)
   end
@@ -328,30 +261,18 @@ defmodule Vista do
 
  # FUNCIONES DE FORMATO
 
-  @doc """
-  Genera el título de cada reporte utilizando una línea separadora.
-  """
   defp generar_titulo(texto) do
     "\n#{@raya}\n#{texto}\n#{@raya}\n"
   end
 
-  @doc """
-  Convierte un número a texto con la cantidad de decimales indicada.
-  """
   defp formatear_decimales(valor, decimales) do
     :erlang.float_to_binary(valor * 1.0, decimals: decimales)
   end
 
-  @doc """
-  Formatea un valor como cantidad de dinero.
-  """
   defp formatear_pesos(valor) do
     "$#{formatear_decimales(valor, 0)}"
   end
 
-  @doc """
-  Convierte un valor booleano en "Sí" o "No".
-  """
   defp generar_si_o_no(true), do: "Sí"
   defp generar_si_o_no(false), do: "No"
 
