@@ -54,9 +54,6 @@ defmodule Reportes do
 
  # FUNCIONES AUXILIARES:
 
-   @doc """
-  Suma los litros de las entregas agrupándolas según el campo indicado.
-  """
   defp sumar_litros_por_campo(entregas, campo_de_agrupacion) do
     Enum.reduce(
       entregas,
@@ -73,16 +70,10 @@ defmodule Reportes do
       end)
   end
 
-  @doc """
-  Crea un mapa que relaciona el código de cada productor con su nombre.
-  """
   defp crear_mapa_productores(productores) do
     Map.new(productores, fn productor -> {productor.codigo, productor.nombre} end)
   end
 
-  @doc """
-  Crea una ficha con el código y nombre de un productor.
-  """
   defp crear_ficha_productor(codigo, mapa_productores) do
     %{codigo: codigo, nombre: Map.get(mapa_productores, codigo)}
   end
@@ -107,9 +98,6 @@ defmodule Reportes do
     }
   end
 
-  @doc """
-  Cuenta cuántas entregas fueron rechazadas por un motivo específico.
-  """
   defp contar_rechazos_del_motivo(entregas_rechazadas, motivo) do
     entregas_rechazadas
     |> Enum.filter(fn {_entrega, motivo_de_la_entrega} -> motivo_de_la_entrega == motivo end)
@@ -130,10 +118,6 @@ defmodule Reportes do
     |> ranking(campo: :porcentaje_ocupacion, orden: :desc, desempate: :id)
   end
 
-  @doc """
-  Calcula la cantidad de litros almacenados y el porcentaje
-  de ocupación de un tanque.
-  """
   defp calcular_ocupacion_del_tanque(tanque, entregas_validas) do
     litros_almacenados =
       entregas_validas
@@ -255,10 +239,6 @@ defmodule Reportes do
     }
   end
 
-  @doc """
-  Calcula los productores con mayor cantidad de litros entregados
-  en un día determinado.
-  """
   defp calcular_lideres_del_dia(dia, entregas_validas, productores) do
     entregas_del_dia = obtener_entregas_por(entregas_validas, :dia, dia)
 
@@ -288,25 +268,14 @@ defmodule Reportes do
     }
   end
 
-  @doc """
-  Devuelve una lista vacía cuando no hubo litros entregados.
-  """
   defp obtener_lideres(_litros_por_productor, 0), do: []
 
-  @doc """
-  Obtiene los productores que tienen la cantidad máxima de litros
-  y los ordena por código.
-  """
   defp obtener_lideres(litros_por_productor, litros_del_lider) do
     litros_por_productor
     |> Enum.filter(fn productor -> productor.litros == litros_del_lider end)
     |> ranking(campo: :codigo, orden: :asc)
   end
 
-  @doc """
-  Calcula cuántos días fue líder cada productor y determina
-  quién ocupó el primer lugar durante más días.
-  """
   defp calcular_primer_lugar_en_mas_dias(detalle_por_dia, productores) do
     dias_como_lider_por_productor =
       Enum.map(productores, fn productor ->
@@ -333,25 +302,14 @@ defmodule Reportes do
     }
   end
 
-  @doc """
-  Devuelve una lista vacía cuando ningún productor ocupó
-  el primer lugar durante algún día.
-  """
   defp obtener_ganadores(_dias_como_lider_por_productor, 0), do: []
 
-  @doc """
-  Obtiene los productores que ocuparon el primer lugar durante
-  la mayor cantidad de días y los ordena por código.
-  """
   defp obtener_ganadores(dias_como_lider_por_productor, maximo_de_dias) do
     dias_como_lider_por_productor
     |> Enum.filter(fn productor -> productor.dias_como_lider == maximo_de_dias end)
     |> ranking(campo: :codigo, orden: :asc)
   end
 
-  @doc """
-  Verifica si un productor fue líder durante un día específico.
-  """
   defp fue_lider_ese_dia?(dia, codigo_del_productor) do
     Enum.any?(dia.productores_lideres, fn lider -> lider.codigo == codigo_del_productor end)
   end
@@ -390,10 +348,6 @@ defmodule Reportes do
     }
   end
 
-  @doc """
-  Calcula la calidad de un productor utilizando la grasa ponderada
-  por litros y la grasa simple.
-  """
   defp calcular_calidad_del_productor(productor, entregas) do
     cantidad_de_entregas = length(entregas)
     litros_totales = sumar_litros(entregas)
@@ -446,15 +400,8 @@ defmodule Reportes do
     }
   end
 
-  @doc """
-  Devuelve 0 cuando no se recibieron litros para evitar
-  una división entre cero.
-  """
   defp calcular_costo_por_litro(_total_pagado, 0), do: 0
 
-  @doc """
-  Calcula el costo promedio por litro recibido.
-  """
   defp calcular_costo_por_litro(total_pagado, litros_recibidos) do
     total_pagado / litros_recibidos
   end
@@ -473,17 +420,10 @@ defmodule Reportes do
     end)
   end
 
-  @doc """
-  Verifica si un productor realizó al menos una entrega válida
-  en todos los tanques disponibles.
-  """
   defp entrego_en_todos_los_tanques?(productor, entregas_validas, tanques) do
     Enum.all?(tanques, fn tanque -> entrego_en_el_tanque?(productor, tanque, entregas_validas) end)
   end
 
-  @doc """
-  Verifica si un productor realizó una entrega válida en un tanque específico.
-  """
   defp entrego_en_el_tanque?(productor, tanque, entregas_validas) do
     Enum.any?(entregas_validas, fn entrega -> entrega.productor == productor.codigo and entrega.tanque == tanque.id end)
   end
