@@ -1,9 +1,13 @@
+# Integrantes: Luisa Hernández, Isabella Hincapié, Camila González
+
 defmodule Util2 do
   @moduledoc """
   Módulo con funciones que se reutilizan
   - autor: Camila Gonzalez, Isabella Hincapié, Luisa Hernández
   - fecha: 2026
   - licencia: GNU GPL V3
+
+  Para el parcial se dejaron solo las funciones que no usan recursividad.
   """
 
   @doc """
@@ -45,7 +49,7 @@ defmodule Util2 do
   ["ana", "sebastian", "luis"] |> Util2.ordenar(:desc, &String.length/1)
   """
 
-  def ordenar(coleccion, sentido \\:asc, obtener_campo \\ & &1) do
+  def ordenar(coleccion, sentido \\ :asc, obtener_campo \\ & &1) do
     Enum.sort_by(coleccion, obtener_campo, sentido)
   end
 
@@ -93,141 +97,36 @@ defmodule Util2 do
 
   ## Ejemplo
   iex> Util2.convertir_coleccion_mensaje(["Ana", "Luis"])
-  iex> Util2.convertir_coleccion_mensaje([1, 2], fn numero -> "Número: {numero}" end)
+  iex> Util2.convertir_coleccion_mensaje([1, 2], fn numero -> "Número: \#{numero}" end)
 
   o puede usar
   ["Ana", "Luis"] |> Util2.convertir_coleccion_mensaje()
   """
 
   def convertir_coleccion_mensaje(
-    coleccion,
-    formato \\ fn elemento -> "- #{elemento}\n" end
-  ) do
+        coleccion,
+        formato \\ fn elemento -> "- #{elemento}\n" end
+      ) do
     Enum.map(coleccion, formato)
   end
 
   @doc """
-  Función para ingresar datos desde el teclado
+  Función para ingresar un texto desde el teclado
   ## Parámetro
-  - pregunta / mensaje: texto que se le presenta al usuario
-  - atomo: identifica el tipo de dato.
-     :texto: para ingresar un texto
-     :entero: para ingresar un número entero
-     :real: para ingresar un número real
-     :boolean: para responder s (true) o n (false)
-     :coleccion_textos: para ingresar una lista de textos
-     :coleccion_enteros: para ingresar una lista de números enteros
-     :coleccion_reales: para ingresar una lista de números reales
-     :coleccion: para ingresar una lista; en este caso el primer parámetro
-      no es un texto sino una función que ingresa cada elemento
+  - pregunta: texto que se le presenta al usuario
+
+  Devuelve lo que escribió el usuario sin espacios al inicio ni al final.
 
   ## Ejemplo
   iex> Util2.ingresar("Ingrese un texto: ", :texto)
-  iex> Util2.ingresar("Ingrese un número entero: ", :entero)
-  iex> Util2.ingresar("Ingrese un número real: ", :real)
-  iex> Util2.ingresar("¿Desea continuar (s/n)? ", :boolean)
-  iex> Util2.ingresar("Ingrese un nombre: ", :coleccion_textos)
-  iex> Util2.ingresar("Ingrese una edad: ", :coleccion_enteros)
-  iex> Util2.ingresar("Ingrese una nota: ", :coleccion_reales)
-  iex> Util2.ingresar(fn -> Util2.ingresar("Ingrese un número: ", :entero) end, :coleccion)
 
   o puede usar
   "Ingrese un texto: " |> Util2.ingresar(:texto)
-  "Ingrese un número entero: " |> Util2.ingresar(:entero)
-  "Ingrese una nota: " |> Util2.ingresar(:coleccion_reales)
   """
 
-  def ingresar(pregunta, :coleccion_textos) do
-    ingresar(fn -> ingresar(pregunta, :texto) end, :coleccion)
-  end
-
-   def ingresar(pregunta, :coleccion_enteros) do
-    ingresar(fn -> ingresar(pregunta, :entero) end, :coleccion)
-  end
-
-   def ingresar(pregunta, :coleccion_reales) do
-    ingresar(fn -> ingresar(pregunta, :real) end, :coleccion)
-  end
-
-  def ingresar(ingresar_elemento, :coleccion) do
-    ingresar_coleccion(ingresar_elemento, [])
-  end
-
-  def ingresar(mensaje, :boolean) do
-    ingresar(
-      mensaje,
-      fn texto ->
-        case String.downcase(texto) do
-          "s" -> {true, ""}
-          "n" -> {false, ""}
-          _ -> :error
-        end
-      end,
-
-      :boolean
-    )
-    ## el parser devuelve {true, ""} o {false, ""} para que tenga la misma forma que Integer.parse y Float.parse
-  end
-
-    def ingresar(mensaje, :entero) do
-    ingresar(mensaje,
-    &Integer.parse/1,
-    :entero)
-  end
-
-   def ingresar(mensaje, :real) do
-    ingresar(mensaje,
-    &Float.parse/1,
-    :real)
-  end
-
   def ingresar(pregunta, :texto) do
-   pregunta
-   |> IO.gets()
-   |> String.trim()
+    pregunta
+    |> IO.gets()
+    |> String.trim()
   end
-
-
-  ## Función privada para ingresar un dato y convertirlo al tipo indicado
-  ## Parámetro
-  ## - pregunta: texto que se le presenta al usuario
-  ## - parser: función que convierte el texto (Integer.parse, Float.parse o el parser de :boolean)
-  ## - tipo_dato: átomo con el tipo de dato, se usa en el mensaje de error y para volver a preguntar
-  defp ingresar(pregunta, parser, tipo_dato) do
-    resultado =
-      pregunta
-     |> ingresar(:texto)
-     |> parser.()
-
-      case resultado do
-        {valor, ""} ->
-          valor
-        _ ->
-          mostrar("El valor ingresado no es un número #{tipo_dato}\n",
-          :error
-          )
-          ingresar(pregunta, tipo_dato)
-          ## Recursividad, función que se llama a sí misma hasta que el usuario ingrese un valor correcto
-    end
-  end
-
-  ## Función privada para ingresar los elementos de una colección
-  ## Parámetro
-  ## - ingresar_elemento: función que pide un elemento al usuario
-  ## - coleccion_actual: elementos ingresados hasta el momento
-  ## Cada elemento se agrega al inicio de la lista y al final se invierte
-  ## con Enum.reverse para que quede en el orden en que se ingresó
-  defp ingresar_coleccion(ingresar_elemento, coleccion_actual)do
-    elemento = ingresar_elemento.()
-    nueva_coleccion = [elemento | coleccion_actual]
-
-    case ingresar("\n¿Hay más datos (s/n)? ", :boolean) do
-      true ->
-        ingresar_coleccion(ingresar_elemento, nueva_coleccion)
-        ## Recursividad, sigue pidiendo elementos mientras el usuario responda s
-      false ->
-        Enum.reverse(nueva_coleccion)
-    end
-  end
-
 end

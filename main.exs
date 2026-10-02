@@ -37,7 +37,10 @@ defmodule Main do
     Vista.imprimir_combinacion(litros_por_dia, vecino, combinado)
 
     # 5. Comprobante de un productor
-    codigo = String.upcase(leer_linea("\nIngrese el código del productor para el comprobante: "))
+    codigo =
+      "\nIngrese el código del productor para el comprobante: "
+      |> Util2.ingresar(:texto)
+      |> String.upcase()
     Vista.imprimir_comprobante(Liquidacion.comprobante(codigo, productores, validas), codigo)
   end
 
@@ -45,7 +48,7 @@ defmodule Main do
   def registrar_entrega_adicional(validas, rechazadas, productores, tanques) do
     Util2.mostrar("Ingrese una entrega adicional", :mensaje)
     Util2.mostrar("(productor;tanque;dia;litros;grasa)", :mensaje)
-    texto = leer_linea("o Enter para omitir: ")
+    texto = Util2.ingresar("o Enter para omitir: ", :texto)
 
     if texto == "" do
       Util2.mostrar("No se registró entrega adicional.", :mensaje)
@@ -67,15 +70,6 @@ defmodule Main do
               {validas, rechazadas ++ [{entrega, motivo}]}
           end
       end
-    end
-  end
-
-  # Lee una línea del teclado. Si la entrada se cierra (:eof) se toma como vacía.
-  defp leer_linea(mensaje) do
-    case IO.gets(mensaje) do
-      :eof -> ""
-      {:error, _razon} -> ""
-      linea -> String.trim(linea)
     end
   end
 end
