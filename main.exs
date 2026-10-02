@@ -99,4 +99,4 @@ defmodule Main do
 end
 
 # Ejecuta la función principal del programa.
-Main..main()
+Main.main()
