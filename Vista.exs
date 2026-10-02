@@ -2,7 +2,6 @@
 
 defmodule Vista do
 
-  @raya "-------------------------------------------------"
 
   @doc """
   Imprime los ocho reportes en orden.
@@ -19,125 +18,24 @@ defmodule Vista do
   end
 
   @doc """
-  Genera e imprime el reporte R1 de entregas rechazadas.
+  Imprime el reporte R1 de entregas rechazadas.
   """
   def imprimir_r1(r1) do
-    r1
-    |> generar_mensaje_r1()
-    |> Util2.mostrar(:mensaje)
-  end
-
-  @doc """
-  Genera e imprime el reporte R2 de ocupación de tanques.
-  """
-  def imprimir_r2(r2) do
-    r2
-    |> generar_mensaje_r2()
-    |> Util2.mostrar(:mensaje)
-  end
-
-  @doc """
-  Genera e imprime el reporte R3 de litros por día y meta diaria.
-  """
-  def imprimir_r3(r3) do
-    r3
-    |> generar_mensaje_r3()
-    |> Util2.mostrar(:mensaje)
-  end
-
-  @doc """
-  Genera e imprime el reporte R4 de liquidación de productores.
-  """
-  def imprimir_r4(r4) do
-    r4
-    |> generar_mensaje_r4()
-    |> Util2.mostrar(:mensaje)
-  end
-
-  @doc """
-  Genera e imprime el reporte R5 de mayor entregador de cada día.
-  """
-  def imprimir_r5(r5) do
-    r5
-    |> generar_mensaje_r5()
-    |> Util2.mostrar(:mensaje)
-  end
-
-  @doc """
-  Genera e imprime el reporte R6 de mejor calidad.
-  """
-  def imprimir_r6(r6) do
-    r6
-    |> generar_mensaje_r6()
-    |> Util2.mostrar(:mensaje)
-  end
-
-  @doc """
-  Genera e imprime el reporte R7 de total pagado y costo por litro.
-  """
-  def imprimir_r7(r7) do
-    r7
-    |> generar_mensaje_r7()
-    |> Util2.mostrar(:mensaje)
-  end
-
-  @doc """
-  Genera e imprime el reporte R8 de productores con entregas
-  en todos los tanques.
-  """
-  def imprimir_r8(r8) do
-    r8
-    |> generar_mensaje_r8()
-    |> Util2.mostrar(:mensaje)
-  end
-
-  @doc """
-  Genera e imprime la combinación de litros diarios con el centro vecino.
-  """
-  def imprimir_combinacion(propios, vecino, combinado) do
-    generar_mensaje_combinacion(propios, vecino, combinado)
-    |> Util2.mostrar(:mensaje)
-  end
-
-  @doc """
-  Imprime el comprobante de un productor, o avisa si el código no existe.
-  """
-  def imprimir_comprobante({:error, :productor_no_existe}, codigo) do
-    Util2.mostrar("\nEl productor #{codigo} no existe.", :error)
-  end
-
-  def imprimir_comprobante({:ok, comprobante}, _codigo) do
-    comprobante
-    |> generar_mensaje_comprobante()
-    |> Util2.mostrar(:mensaje)
-  end
-
-  # -------------------------------------------------------------------
-  # GENERAR R1. Entregas rechazadas
-
-
-  defp generar_mensaje_r1(r1) do
     [
-      generar_titulo("Reporte 1. Entregas rechazadas"),
+      "\nReporte 1. Entregas rechazadas\n\n",
       generar_lineas_de_rechazadas(r1.entregas_rechazadas),
       "\nRechazos por motivo:\n",
       Util2.convertir_coleccion_mensaje(r1.cantidad_por_motivo, fn {motivo, cantidad} -> "  #{motivo}: #{cantidad}\n" end)
     ]
+    |> Util2.mostrar(:mensaje)
   end
 
-  defp generar_lineas_de_rechazadas([]), do: "  No hubo entregas rechazadas.\n"
-
-  defp generar_lineas_de_rechazadas(entregas_rechazadas) do
-    Util2.convertir_coleccion_mensaje(entregas_rechazadas, fn {entrega, motivo} -> "  #{inspect(entrega)}  ->  #{motivo}\n" end)
-  end
-
-
-  # -------------------------------------------------------------------
-  # GENERAR R2. Ocupación de tanques
-
-  defp generar_mensaje_r2(filas_de_tanques) do
+  @doc """
+  Imprime el reporte R2 de ocupación de tanques.
+  """
+  def imprimir_r2(filas_de_tanques) do
     [
-      generar_titulo("Reporte 2. Ocupación de tanques (de mayor a menor)"),
+      "\nReporte 2. Ocupación de tanques (de mayor a menor)\n\n",
       "  Tanque\tLitros\tCapacidad\tOcupación\n",
       Util2.convertir_coleccion_mensaje(filas_de_tanques, fn tanque ->
         litros = formatear_decimales(tanque.litros_almacenados, 1)
@@ -146,15 +44,16 @@ defmodule Vista do
         "  #{tanque.nombre}\t#{litros}\t#{capacidad}\t#{ocupacion} %\n"
       end)
     ]
+    |> Util2.mostrar(:mensaje)
   end
 
-  # -------------------------------------------------------------------
-  # GENERAR R3. Litros por día y meta diaria
-
-  defp generar_mensaje_r3(r3) do
+  @doc """
+  Imprime el reporte R3 de litros por día y meta diaria.
+  """
+  def imprimir_r3(r3) do
     meta = formatear_decimales(Parametros.meta_diaria(), 0)
     [
-      generar_titulo("Reporte 3. Litros recibidos por día (meta: #{meta} litros)"),
+      "\nReporte 3. Litros recibidos por día (meta: #{meta} litros)\n\n",
       Util2.convertir_coleccion_mensaje(r3.detalle_por_dia, fn dia ->
         litros = formatear_decimales(dia.litros, 1)
         "  Día #{dia.dia}: #{litros} L - Meta alcanzada: #{generar_si_o_no(dia.alcanzo_meta)}\n"
@@ -162,16 +61,17 @@ defmodule Vista do
       "\n  ¿Se cumplió la meta todos los días? #{generar_si_o_no(r3.cumplio_todos_los_dias)}\n",
       "  ¿Se cumplió la meta al menos un día? #{generar_si_o_no(r3.cumplio_al_menos_un_dia)}\n"
     ]
+    |> Util2.mostrar(:mensaje)
   end
 
-  # -------------------------------------------------------------------
-  # GENERAR R4. Liquidación de productores
-
-  defp generar_mensaje_r4(liquidacion_ordenada) do
+  @doc """
+  Imprime el reporte R4 de liquidación de productores.
+  """
+  def imprimir_r4(liquidacion_ordenada) do
     productores_numerados = Enum.with_index(liquidacion_ordenada, 1)
 
     [
-      generar_titulo("Reporte 4. Liquidación de productores (por neto, de mayor a menor)"),
+      "\nReporte 4. Liquidación de productores (por neto, de mayor a menor)\n\n",
       "  #\tProductor\tLitros\tEntregas\tBonif.\tTransp.\tNeto\n",
       Util2.convertir_coleccion_mensaje(productores_numerados, fn {productor, numero} ->
         litros = formatear_decimales(productor.litros, 1)
@@ -182,18 +82,20 @@ defmodule Vista do
         "  #{numero}\t#{productor.nombre}\t#{litros}\t#{entregas}\t#{bonificaciones}\t#{transporte}\t#{neto}\n"
       end)
     ]
+    |> Util2.mostrar(:mensaje)
   end
 
 
-  # -------------------------------------------------------------------
-  # GENERAR R5. Mayor entregador de cada día
-
-  defp generar_mensaje_r5(r5) do
+   @doc """
+  Imprime el reporte R5 de mayor entregador de cada día.
+  """
+  def imprimir_r5(r5) do
     [
-      generar_titulo("Reporte 5. Productor con más litros cada día"),
+      "\nReporte 5. Productor con más litros cada día\n\n",
       Util2.convertir_coleccion_mensaje(r5.detalle_por_dia, fn dia -> generar_linea_de_dia_r5(dia) end),
       generar_linea_de_primer_lugar_r5(r5.primer_lugar_en_mas_dias)
     ]
+    |> Util2.mostrar(:mensaje)
   end
 
   defp generar_linea_de_dia_r5(%{productores_lideres: [], dia: dia}) do
@@ -222,22 +124,24 @@ defmodule Vista do
   end
 
 
-  # -------------------------------------------------------------------
-  # R6. Mejor calidad
 
-  defp generar_mensaje_r6(%{mejor_productor: nil}) do
+  @doc """
+  Imprime el reporte R6 de mejor calidad.
+  """
+  def imprimir_r6(%{mejor_productor: nil}) do
     [
-      generar_titulo("Reporte 6. Mejor calidad (grasa ponderada por litros)"),
+      "\nReporte 6. Mejor calidad (grasa ponderada por litros)\n\n",
       "  Ningún productor tiene al menos 3 entregas válidas.\n"
     ]
+    |> Util2.mostrar(:mensaje)
   end
 
-  defp generar_mensaje_r6(r6) do
+  def imprimir_r6(r6) do
     mejor = r6.mejor_productor
     grasa_del_mejor = formatear_decimales(mejor.grasa_ponderada, 3)
 
     [
-      generar_titulo("Reporte 6. Mejor calidad (grasa ponderada por litros)"),
+      "\nReporte 6. Mejor calidad (grasa ponderada por litros)\n\n",
       "  Mejor calidad: #{mejor.nombre} (#{mejor.codigo}) con #{grasa_del_mejor} %\n",
       "\n  Productor\tEntregas\tPonderada\tSimple\n",
       Util2.convertir_coleccion_mensaje(r6.clasificacion, fn productor ->
@@ -246,30 +150,36 @@ defmodule Vista do
         "  #{productor.nombre}\t#{productor.cantidad_de_entregas}\t#{ponderada}\t#{simple}\n"
       end)
     ]
+    |> Util2.mostrar(:mensaje)
   end
 
 
-  # -------------------------------------------------------------------
-  # R7. Total pagado y costo por litro
 
-  defp generar_mensaje_r7(r7) do
+  @doc """
+  Imprime el reporte R7 de total pagado y costo por litro.
+  """
+  def imprimir_r7(r7) do
     [
-      generar_titulo("Reporte 7. Totales de la semana"),
+      "\nReporte 7. Totales de la semana\n\n",
       "  Total pagado por el centro: #{formatear_pesos(r7.total_pagado)}\n",
       "  Litros recibidos: #{formatear_decimales(r7.litros_recibidos, 1)} L\n",
       "  Costo promedio por litro: #{formatear_pesos(r7.costo_promedio_por_litro)}\n"
     ]
+    |> Util2.mostrar(:mensaje)
   end
 
 
-  # -------------------------------------------------------------------
-  # R8. Productores con entregas en todos los tanques
 
-  defp generar_mensaje_r8(productores) do
+  @doc """
+  Imprime el reporte R8 de productores con entregas
+  en todos los tanques.
+  """
+  def imprimir_r8(productores) do
     [
-      generar_titulo("Reporte 8. Productores con entregas en todos los tanques"),
+      "\nReporte 8. Productores con entregas en todos los tanques\n\n",
       generar_lineas_de_productores_r8(productores)
     ]
+    |> Util2.mostrar(:mensaje)
   end
 
   defp generar_lineas_de_productores_r8([]), do: "  Ninguno.\n"
@@ -279,14 +189,15 @@ defmodule Vista do
   end
 
 
-  # -------------------------------------------------------------------
-  # INVESTIGACIÓN. Combinación con el centro vecino
 
-  defp generar_mensaje_combinacion(propios, vecino, combinado) do
+  @doc """
+  Imprime la combinación de litros diarios con el centro vecino.
+  """
+  def imprimir_combinacion(propios, vecino, combinado) do
     dias = combinado |> Map.keys() |> Util2.ordenar(:asc)
 
     [
-      generar_titulo("Investigación. Combinación con el centro vecino (Map.merge/3)"),
+      "\nInvestigación. Combinación con el centro vecino (Map.merge/3)\n\n",
       "  Día\tPropio\tVecino\tCombinado\n",
       Util2.convertir_coleccion_mensaje(dias, fn dia ->
         propio = generar_valor_del_dia(propios, dia)
@@ -295,9 +206,9 @@ defmodule Vista do
         "  #{dia}\t#{propio}\t#{del_vecino}\t#{total}\n"
       end)
     ]
+    |> Util2.mostrar(:mensaje)
   end
 
-  # Si el día no está en el mapa, muestra "-"
   defp generar_valor_del_dia(mapa, dia) do
     if Map.has_key?(mapa, dia) do
       formatear_decimales(mapa[dia], 1)
@@ -307,12 +218,17 @@ defmodule Vista do
   end
 
 
-  # -------------------------------------------------------------------
-  # COMPROBANTE DEL PRODUCTOR
 
-  defp generar_mensaje_comprobante(comprobante) do
+  @doc """
+  Imprime el comprobante de un productor, o avisa si el código no existe.
+  """
+  def imprimir_comprobante({:error, :productor_no_existe}, codigo) do
+    Util2.mostrar("\nEl productor #{codigo} no existe.", :error)
+  end
+
+  def imprimir_comprobante({:ok, comprobante}, _codigo) do
     [
-      generar_titulo("Comprobante de pago"),
+      "\nComprobante de pago\n",
       "  Productor: #{comprobante.nombre} (#{comprobante.codigo})\n\n",
       generar_lineas_de_comprobante(comprobante.detalle),
       "\n  Litros entregados: #{formatear_decimales(comprobante.litros, 1)} L\n",
@@ -321,6 +237,13 @@ defmodule Vista do
       "  Descuento por transporte: #{formatear_pesos(comprobante.transporte)}\n",
       "  Neto a pagar: #{formatear_pesos(comprobante.neto)}\n"
     ]
+    |> Util2.mostrar(:mensaje)
+  end
+
+  defp generar_lineas_de_rechazadas([]), do: "  No hubo entregas rechazadas.\n"
+
+  defp generar_lineas_de_rechazadas(entregas_rechazadas) do
+    Util2.convertir_coleccion_mensaje(entregas_rechazadas, fn {entrega, motivo} -> "  #{inspect(entrega)}  ->  #{motivo}\n" end)
   end
 
   defp generar_lineas_de_comprobante([]), do: "  No tuvo entregas válidas en la semana.\n"
@@ -337,13 +260,6 @@ defmodule Vista do
     ]
   end
 
-
-  # -------------------------------------------------------------------
-  # FUNCIONES DE FORMATO
-
-  defp generar_titulo(texto) do
-    "\n#{@raya}\n#{texto}\n#{@raya}\n"
-  end
 
   defp formatear_decimales(valor, decimales) do
     :erlang.float_to_binary(valor * 1.0, decimals: decimales)
